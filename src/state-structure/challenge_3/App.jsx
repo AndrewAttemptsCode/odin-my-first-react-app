@@ -1,0 +1,59 @@
+import { useState } from 'react';
+import { initialLetters } from './data.js';
+import Letter from './Letter.jsx';
+
+export default function MailClient() {
+  const [letters, setLetters] = useState(initialLetters);
+  const [highlightedId, setHighlightedId] = useState(null);
+
+  function handleHover(letterId) {
+    setHighlightedId(letterId);
+  }
+
+  function handleStar(starredId) {
+    setLetters(letters.map(letter => {
+      if (letter.id === starredId) {
+        return {
+          ...letter,
+          isStarred: !letter.isStarred
+        };
+      } else {
+        return letter;
+      }
+    }));
+  }
+
+  return (
+    <>
+      <h2>Inbox</h2>
+      <ul>
+        {letters.map(letter => (
+          <Letter
+            key={letter.id}
+            letter={letter}
+            isHighlighted={
+              letter.id === highlightedId
+            }
+            onHover={handleHover}
+            onToggleStar={handleStar}
+          />
+        ))}
+      </ul>
+    </>
+  );
+}
+
+// Challenge 3 of 4: Fix the disappearing selection 
+
+// There is a list of letters in state. When you hover or focus 
+// a particular letter, it gets highlighted. The currently highlighted 
+// letter is stored in the highlightedLetter state variable. 
+// You can “star” and “unstar” individual letters, which updates 
+// the letters array in state.
+
+// This code works, but there is a minor UI glitch. When you 
+// press “Star” or “Unstar”, the highlighting disappears for 
+// a moment. However, it reappears as soon as you move your 
+// pointer or switch to another letter with keyboard. Why is 
+// this happening? Fix it so that the highlighting doesn’t 
+// disappear after the button click.
