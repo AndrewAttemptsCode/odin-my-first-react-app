@@ -1,4 +1,3 @@
-/* eslint-disable react/destructuring-assignment */
 import { Component } from 'react';
 import Count from './Count';
 
@@ -7,43 +6,61 @@ class ClassInput extends Component {
     super(props);
 
     this.state = {
-      todos: ['Just some demo tasks', 'As an example'],
+      todos: [
+        { text: 'Just some demo tasks', editMode: false },
+        { text: 'As an example', editMode: false },
+      ],
       inputVal: '',
     };
 
     this.handleInputChange = this.handleInputChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
     this.removeTask = this.removeTask.bind(this);
+    this.toggleEditTask = this.toggleEditTask.bind(this);
+    this.updateTask = this.updateTask.bind(this);
   }
 
   handleInputChange(e) {
-    this.setState((state) => ({
-      ...state,
-      inputVal: e.target.value,
-    }));
+    this.setState({ inputVal: e.target.value });
   }
 
   handleSubmit(e) {
     e.preventDefault();
-    this.setState((state) => ({
-      todos: state.todos.concat(state.inputVal),
-      inputVal: '',
-    }));
+    if (this.state.inputVal.trim()) {
+      this.setState((state) => ({
+        todos: [...state.todos, { text: state.inputVal, editMode: false }],
+        inputVal: '',
+      }));
+    }
   }
 
   removeTask(todo) {
-    const filtered = this.state.todos.filter(task => task !== todo);
-    this.setState({todos: filtered});
+    const filtered = this.state.todos.filter((task) => task.text !== todo.text);
+    this.setState({ todos: filtered });
+  }
+
+  toggleEditTask(index) {
+    this.setState((state) => {
+      const todos = [...state.todos];
+      todos[index].editMode = true;
+      return { todos };
+    });
+  }
+
+  updateTask(index, newText) {
+    this.setState((state) => {
+      const todos = [...state.todos];
+      todos[index].text = newText;
+      todos[index].editMode = false;
+      return { todos };
+    });
   }
 
   render() {
     return (
       <section>
-        {/* eslint-disable-next-line react/prop-types */}
         <h3>{this.props.name}</h3>
-        {/* The input field to enter To-Do's */}
         <form onSubmit={this.handleSubmit}>
-          {/* eslint-disable-next-line jsx-a11y/label-has-associated-control */}
           <label htmlFor="task-entry">Enter a task: </label>
           <input
             type="text"
@@ -54,10 +71,28 @@ class ClassInput extends Component {
           <button type="submit">Submit</button>
         </form>
         <h4>All the tasks!</h4>
-        {/* The list of all the To-Do's, displayed */}
         <ul>
-          {this.state.todos.map((todo) => (
-            <li key={todo}>{todo} <button onClick={() => this.removeTask(todo)}>Delete</button></li>
+          {this.state.todos.map((todo, index) => (
+            <li key={index}>
+              {todo.editMode ? (
+                <>
+                  <input
+                    type="text"
+                    defaultValue={todo.text}
+                    onBlur={(e) => this.updateTask(index, e.target.value)}
+                  />
+                  <button onClick={() => this.updateTask(index, todo.text)}>
+                    Resubmit
+                  </button>
+                </>
+              ) : (
+                <>
+                  {todo.text}
+                  <button onClick={() => this.removeTask(todo)}>Delete</button>
+                  <button onClick={() => this.toggleEditTask(index)}>Edit</button>
+                </>
+              )}
+            </li>
           ))}
         </ul>
         <Count todos={this.state.todos} />
